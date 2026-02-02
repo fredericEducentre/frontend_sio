@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="fr">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Inscription - Forum Insecure</title>
+		<link rel="stylesheet" href="style.css">
+	</head>
+	<body>
+		<div class="container auth-container">
+			<h1>Inscription</h1>
+			<div id="authMessage"></div>
+			<form id="registerForm">
+				<div class="form-group">
+					<label for="username">Nom d'utilisateur</label>
+					<input type="text" id="username" required placeholder="Choisissez un nom d'utilisateur">
+				</div>
+				<div class="form-group">
+					<label for="email">E-mail</label>
+					<input type="text" id="email" required placeholder="Entrez votre e-mail">
+				</div>
+				<div class="form-group">
+					<label for="password">Mot de passe</label>
+					<input type="text" id="password" required placeholder="Choisissez un mot de passe">
+				</div>
+				<button type="submit">Créer un compte</button>
+			</form>
+			<div class="auth-footer">
+				Déjà un compte ?
+				<a href="login.html">Se connecter ici</a>
+			</div>
+		</div>
+
+		<script>
+			const API_URL = 'http://localhost:8081/api/register.php';
+
+document.getElementById('registerForm').addEventListener('submit', async (e) => {
+e.preventDefault();
+const username = document.getElementById('username').value;
+const email = document.getElementById('email').value;
+const password = document.getElementById('password').value;
+const msg = document.getElementById('authMessage');
+
+try {
+const res = await fetch(API_URL, {
+method: 'POST',
+headers: {
+'Content-Type': 'application/json'
+},
+body: JSON.stringify(
+{username, email, password}
+)
+});
+const result = await res.json();
+
+if (result.success) {
+msg.innerHTML = `<p style="color: green; text-align: center;">${
+result.message
+} <a href="login.html">Se connecter maintenant</a></p>`;
+document.getElementById('registerForm').reset();
+} else {
+msg.innerHTML = `<p style="color: red; text-align: center;">${
+result.error
+}</p>`;
+}
+} catch (err) {
+msg.innerHTML = '<p style="color: red; text-align: center;">L\'inscription a échoué. Vérifiez le serveur.</p>';
+}
+});
+		</script>
+	</body>
+</html>

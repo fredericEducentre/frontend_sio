@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="fr">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Connexion - Forum Insecure</title>
+		<link rel="stylesheet" href="style.css">
+	</head>
+	<body>
+		<div class="container auth-container">
+			<h1>Connexion</h1>
+			<div id="authMessage"></div>
+			<form id="loginForm">
+				<div class="form-group">
+					<label for="username">Nom d'utilisateur</label>
+					<input type="text" id="username" required placeholder="Entrez votre nom d'utilisateur">
+				</div>
+				<div class="form-group">
+					<label for="password">Mot de passe</label>
+					<input type="text" id="password" required placeholder="Entrez votre mot de passe">
+				</div>
+				<button type="submit">Se connecter</button>
+			</form>
+			<div class="auth-footer">
+				Vous n'avez pas de compte ?
+				<a href="register.html">Inscrivez-vous ici</a>
+			</div>
+		</div>
+
+		<script>
+			const API_URL = 'http://localhost:8081/api/login.php';
+
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+e.preventDefault();
+const username = document.getElementById('username').value;
+const password = document.getElementById('password').value;
+const msg = document.getElementById('authMessage');
+
+try {
+const res = await fetch(API_URL, {
+method: 'POST',
+headers: {
+'Content-Type': 'application/json'
+},
+body: JSON.stringify(
+{username, password}
+)
+});
+const result = await res.json();
+
+if (result.success) {
+localStorage.setItem('user', JSON.stringify(result.user));
+msg.innerHTML = `<p style="color: green; text-align: center;">Connexion réussie ! Redirection...</p>`;
+setTimeout(() => window.location.href = 'index.html', 1000);
+} else {
+msg.innerHTML = `<p style="color: red; text-align: center;">${
+result.error
+}</p>`;
+}
+} catch (err) {
+msg.innerHTML = '<p style="color: red; text-align: center;">Échec de la connexion. Vérifiez si le serveur tourne sur le port 8081.</p>';
+}
+});
+
+if (localStorage.getItem('user')) {
+window.location.href = 'index.html';
+}
+		</script>
+	</body>
+</html>

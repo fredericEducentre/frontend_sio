@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="fr">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Forum - Forum Insecure</title>
+		<link rel="stylesheet" href="style.css">
+	</head>
+	<body>
+		<nav>
+			<a href="index.html" class="active">Forum</a>
+			<a href="#" onclick="logout()">Déconnexion</a>
+		</nav>
+
+		<div class="container">
+			<h1>Messages récents</h1>
+			<div id="postsList">
+				<p style="text-align: center;">Chargement des messages...</p>
+			</div>
+		</div>
+
+		<div class="container">
+			<h2>Nouveau Message</h2>
+			<div id="postMessage"></div>
+			<form id="postForm">
+				<div class="form-group">
+					<label for="content">Contenu</label>
+					<textarea id="content" rows="4" required placeholder="Qu'avez-vous en tête ?"></textarea>
+				</div>
+				<button type="submit">Publier</button>
+			</form>
+		</div>
+
+		<script>
+			const API_URL = 'http://localhost:8081/api/posts.php';
+
+const userStr = localStorage.getItem('user');
+if (! userStr) 
+window.location.href = 'login.html';
+
+const currentUser = JSON.parse(userStr);
+
+async function fetchPosts() {
+const list = document.getElementById('postsList');
+try {
+const res = await fetch(API_URL);
+const posts = await res.json();
+
+list.innerHTML = '';
+if (posts.length === 0) {
+list.innerHTML = '<p style="text-align: center;">Aucun message trouvé.</p>';
+return;
+}
+
+posts.forEach(post => {
+const item = document.createElement('div');
+item.className = 'list-item';
+item.innerHTML = `
+                        <div class="item-content">
+                            <div class="author">${
+post.username
+} (ID: ${
+post.user_id
+})</div>
+                            <div class="date">${
+post.created_at
+}</div>
+                            <div class="content">${
+post.content
+}</div>
+                        </div>
+                        <button class="delete-btn" onclick="deletePost(${
+post.id
+})">Supprimer</button>
+                    `;
+list.appendChild(item);
+});
+} catch (err) {
+list.innerHTML = '<p style="color: red; text-align: center;">Erreur lors du chargement des messages.</p>';
+}
+}
+
+document.getElementById('postForm').addEventListener('submit', async (e) => {
+e.preventDefault();
+const user_id = currentUser.id;
+const content = document.getElementById('content').value;
+const msg = document.getElementById('postMessage');
+
+try {
+const res = await fetch(API_URL, {
+method: 'POST',
+headers: {
+'Content-Type': 'application/json'
+},
+body: JSON.stringify(
+{user_id, content}
+)
+});
+const result = await res.json();
+
+if (result.success) {
+msg.innerHTML = `<p style="color: green;">${
+result.message
+}</p>`;
+document.getElementById('content').value = '';
+fetchPosts();
+} else {
+msg.innerHTML = `<p style="color: red;">${
+result.error
+}</p>`;
+}
+} catch (err) {
+msg.innerHTML = '<p style="color: red;">Échec de la publication.</p>';
+}
+});
+
+async function deletePost(id) {
+if (!confirm('Êtes-vous sûr de vouloir supprimer ce message ?')) 
+return;
+
+
+try {
+const res = await fetch(`${API_URL}?id=${id}`, {method: 'DELETE'});
+const result = await res.json();
+if (result.success) {
+fetchPosts();
+} else {
+alert('Erreur : ' + result.error);
+}
+} catch (err) {
+alert('Une erreur est survenue.');
+}
+}
+
+function logout() {
+localStorage.removeItem('user');
+window.location.href = 'login.html';
+}
+
+fetchPosts();
+		</script>
+	</body>
+</html>
