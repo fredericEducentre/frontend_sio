@@ -17,5 +17,5 @@ Cette partie de l'application constitue l'interface utilisateur (UI) développé
 
 ## Installation et Test
 
-Modifier l'URL de l'API dans les fichiers `login.html` et `register.html` pour qu'elle corresponde à l'URL de votre serveur.
+Modifier l'URL de l'API dans les fichiers `index.html`, `login.html` et `register.html` pour qu'elle corresponde à l'URL de votre serveur.
 Assurez-vous que le backend est démarré
